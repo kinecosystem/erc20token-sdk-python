@@ -1,0 +1,13 @@
+.DS_Store
+*.pyc
+.idea
+.coverage
+*.pyc
+*.log
+MANIFEST
+.cache/
+docs/build
+dist/
+virtualenv/
+test/truffle_env/build/
+test/truffle_env/node_modules/

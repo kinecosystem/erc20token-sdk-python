@@ -1,0 +1,27 @@
+sudo: required
+language: python
+python:
+  - "2.7"
+  - "3.6"
+
+cache:
+  - pip
+  - yarn
+
+before_install:
+  - . $HOME/.nvm/nvm.sh
+  - nvm install stable
+  - nvm use stable
+  - npm install
+
+install:
+  - make init
+
+script:
+  - make test
+
+#after_success:
+#  - codecov --token=$CODECOV_TOKEN
+
+notifications:
+  email: false
