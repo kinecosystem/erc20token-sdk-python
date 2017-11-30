@@ -532,11 +532,12 @@ class FilterManager(object):
 
     def add_filter(self, filter_params,  *callbacks):
         """Setup a new filter or add a callback if the filter already exists.
-        After registering of a new filter, its worker function is overriden with out custom one.
+        After registering of a new filter, its worker function is overriden with our custom one.
 
         :param filter_params: parameters to pass to `web3.eth.filter`
         :param callbacks: callback function to add
-        :return: filter_id
+        :returns: filter_id
+        :rtype: str
         """
         filter_key = hash(filter_params)
         if filter_key not in self.filters:
@@ -575,7 +576,7 @@ class FilterManager(object):
         return _runner
 
     def remove_filters(self):
-        """Unregister our filters from the node. Might not be needed, as filters will time out anyway."""
+        """Unregister our filters from the node. Not required, as filters will time out anyway."""
         for key, filtr in self.filters.items():
             filtr.stop_watching(0.1)
             self.filters.pop(key, None)
