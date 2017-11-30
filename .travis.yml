@@ -9,6 +9,8 @@ cache:
   - yarn
 
 before_install:
+  # downgrade setuptools to work around the 'tests_require' error
+  - pip install setuptools==37.0.0
   - . $HOME/.nvm/nvm.sh
   - nvm install stable
   - nvm use stable
