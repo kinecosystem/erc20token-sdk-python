@@ -22,7 +22,7 @@ from web3.utils.encoding import (
     to_bytes,
     to_hex,
 )
-
+from web3.utils.transactions import get_buffered_gas_estimate
 from web3.utils.validation import (
     validate_abi,
     validate_address,
@@ -41,8 +41,8 @@ logger = logging.getLogger(__name__)
 ERC20_TRANSFER_ABI_PREFIX = encode_hex(function_signature_to_4byte_selector('transfer(address, uint256)'))
 
 # default gas configuration.
-DEFAULT_GAS_PER_TX = 90000
-DEFAULT_GAS_PRICE = 50 * 10 ** 9  # 50 gwei
+DEFAULT_GAS_PER_TX = 60000
+DEFAULT_GAS_PRICE = 10 * 10 ** 9  # 10 Gwei
 
 # default request retry configuration (linear backoff).
 RETRY_ATTEMPTS = 3
@@ -155,7 +155,7 @@ class SDK(object):
                 raise SdkConfigurationError('cannot load private key: ' + str(e))
 
             # init transaction manager
-            self._tx_manager = TransactionManager(self.web3, self.private_key, self.address)
+            self._tx_manager = TransactionManager(self.web3, self.private_key, self.address, self.token_contract)
 
         # monitoring filter manager
         self._filter_mgr = FilterManager(self.web3)
@@ -466,12 +466,18 @@ class TransactionManager(object):
     and centralize nonce calculation.
     """
 
-    def __init__(self, web3, private_key, address):
+    def __init__(self, web3, private_key, address, token_contract):
         self.web3 = web3
         self.private_key = private_key
         self.address = address
+        self.token_contract = token_contract
         self.local_nonce = self.web3.eth.getTransactionCount(self.address)
         self.lock = threading.Lock()
+
+        # initial gas estimations
+        self.ether_tx_gas_estimate = self.estimate_ether_tx_gas() or DEFAULT_GAS_PER_TX
+        self.token_tx_gas_estimate = self.estimate_token_tx_gas() or DEFAULT_GAS_PER_TX
+        self.gas_price = self.web3.eth.gasPrice or DEFAULT_GAS_PRICE
 
     def send_transaction(self, address, amount, data=b''):
         """Send transaction with retry.
@@ -487,6 +493,12 @@ class TransactionManager(object):
         :returns: transaction id (hash)
         :rtype: str
         """
+
+        if data:  # token transaction
+            gas_estimate = self.token_tx_gas_estimate
+        else:
+            gas_estimate = self.ether_tx_gas_estimate
+
         with self.lock:
             attempts = 0
             while True:
@@ -495,8 +507,8 @@ class TransactionManager(object):
                     nonce = max(self.local_nonce, remote_nonce)
                     tx = Transaction(
                         nonce=nonce,
-                        gasprice=DEFAULT_GAS_PRICE,  # TODO: optimal gas price
-                        startgas=DEFAULT_GAS_PER_TX,  # TODO: optimal gas limit
+                        gasprice=self.gas_price,
+                        startgas=gas_estimate,
                         to=address,
                         value=self.web3.toWei(amount, 'ether'),
                         data=data,
@@ -518,6 +530,24 @@ class TransactionManager(object):
                             sleep(RETRY_DELAY)  # TODO: exponential backoff, configurable retry?
                             continue
                     raise
+
+    def estimate_ether_tx_gas(self):
+        sample_tx = {
+            'to': self.address,
+            'from': self.address,
+            'value': 1
+        }
+        return get_buffered_gas_estimate(self.web3, sample_tx, gas_buffer=5000)
+
+    def estimate_token_tx_gas(self):
+        hex_data = self.token_contract._encode_transaction_data('transfer', args=(self.address, 1000))
+        sample_tx = {
+            'to': self.address,
+            'from': self.address,
+            'value': 0,
+            'data': hex_data
+        }
+        return get_buffered_gas_estimate(self.web3, sample_tx, gas_buffer=10000)
 
 
 class FilterManager(object):
