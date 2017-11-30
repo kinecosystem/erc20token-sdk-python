@@ -23,8 +23,11 @@ load Python services with C code; it is a "pure" Python environment. However, th
 [web3 package](https://pypi.python.org/pypi/web3/) requires other packages that are natively implemented, namely
 [pysha3](https://pypi.python.org/pypi/pysha3) and [cytoolz](https://pypi.python.org/pypi/cytoolz).
 In order to overcome this limitation, do the following:
-1. Replace the `sha3.py` installed by pysha3 with the [attached sha3.py](sha3.py).
+1. Replace the `sha3.py` installed by pysha3 with the [attached sha3.py](sha3.py.alt).
 2. Replace the installed `cytoolz` package with the `toolz` package.
+
+You will still not be able to use the functions `monitor_ether_transactions` and `monitor_token_transactions`
+because they launch a thread, and GAE Standard applications cannot spawn threads.
 
 
 ## Usage

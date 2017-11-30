@@ -183,6 +183,13 @@ def test_sdk(testnet):
     assert sdk.token_contract
     assert sdk.private_key == testnet.private_key
     assert sdk.get_address() == testnet.address
+    assert sdk._tx_manager.ether_tx_gas_estimate > 10000
+    assert sdk._tx_manager.token_tx_gas_estimate > 20000
+    assert sdk._tx_manager.gas_price >= 10 ** 9
+    if testnet.type == 'testrpc':
+        # in testrpc, gas calculation for token transfer is too low and causes
+        # out of gas errors, so we add a bit more gas
+        sdk._tx_manager.token_tx_gas_estimate += 5000
     return sdk
 
 
