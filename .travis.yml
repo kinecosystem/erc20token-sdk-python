@@ -23,7 +23,7 @@ script:
   - make test
 
 #after_success:
-#  - codecov --token=$CODECOV_TOKEN
+  - codecov --token=9c6e620b-d46a-4049-b501-4f61655ec695
 
 notifications:
   email: false
