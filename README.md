@@ -51,7 +51,8 @@ token_sdk = erc20token.SDK(private_key='a60baaa34ed125af0570a3df7d4cd3e80dd5dc50
 
 # Init SDK with my keyfile and default parameters
 # First, create a keyfile from my private key
-erc20token.create_keyfile('a60baaa34ed125af0570a3df7d4cd3e80dd5dc5070680573f8de0ecfc1957575', 'my password', 'keyfile.json')
+erc20token.create_keyfile('a60baaa34ed125af0570a3df7d4cd3e80dd5dc5070680573f8de0ecfc1957575', 
+                          'my password', 'keyfile.json')
 # Init SDK with this keyfile
 token_sdk = erc20token.SDK(keyfile='keyfile.json', password='my password')
 
@@ -93,7 +94,7 @@ tx_id = token_sdk.send_ether('address', 10)
 tx_id = token_sdk.send_tokens('address', 10)
 ```
 
-### Transaction Monitoring
+### Getting Transaction Data
 ```python
 # Get transaction status
 tx_status = token_sdk.get_transaction_status(tx_id)
@@ -115,7 +116,10 @@ tx_data = token_sdk.get_transaction_data(tx_id)
 #   -1 if transaction is not found
 #    0 if transaction is pending
 #   >0 if transaction is confirmed
+```
 
+### Transaction Monitoring
+```python
 # Setup monitoring callback
 tx_statuses = {}
 def mycallback(tx_id, status, from_address, to_address, amount):
@@ -127,7 +131,7 @@ token_sdk.monitor_token_transactions(mycallback, from_address=token_sdk.get_addr
 # Send tokens
 tx_id = token_sdk.send_tokens('to address', 10)
 
-# In a second or two, the transaction enters the pending queue
+# In a short while, the transaction enters the pending queue
 for wait in range(0, 5000):
     if tx_statuses[tx_id] > erc20token.TransactionStatus.UNKNOWN:
         break
@@ -142,10 +146,9 @@ for wait in range(0, 90):
 assert tx_statuses[tx_id] == erc20token.TransactionStatus.SUCCESS
 ```
 
-## Support & Discussion
-
 ## License
-Code released under [GPLv2 license](LICENSE)
+The code is currently released under [GPLv2 license](LICENSE) due to some GPL-licensed packages it uses. In the 
+future, we will make an effort to use a less restrictive license.
 
 ## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md) for SDK contributing guidelines. 
