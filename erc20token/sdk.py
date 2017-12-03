@@ -310,8 +310,9 @@ class SDK(object):
             tx_block_number = int(tx['blockNumber'])
             cur_block_number = int(self.web3.eth.blockNumber)
             tx_data.num_confirmations = cur_block_number - tx_block_number + 1
-        if tx.get('input') and not (tx['input'] == '0x' or tx['input'] == '0x0'):  # contract transaction
-            to, amount = decode_abi(['uint256', 'uint256'], tx['input'][len(ERC20_TRANSFER_ABI_PREFIX):])
+        tx_input = tx.get('input')
+        if tx_input and (tx_input.lower().startswith(ERC20_TRANSFER_ABI_PREFIX.lower())):
+            to, amount = decode_abi(['uint256', 'uint256'], tx_input[len(ERC20_TRANSFER_ABI_PREFIX):])
             tx_data.to_address = to_hex(to)
             tx_data.token_amount = self.web3.fromWei(amount, 'ether')
         return tx_data
@@ -404,10 +405,10 @@ class SDK(object):
         tx_receipt = self.web3.eth.getTransactionReceipt(tx['hash'])
 
         # Byzantium fork introduced a status field
-        status = tx_receipt.get('status')
-        if status == '0x1' or status == 1:
+        tx_status = tx_receipt.get('status')
+        if tx_status == '0x1' or tx_status == 1:
             return TransactionStatus.SUCCESS
-        if status == '0x0' or status == 0:
+        if tx_status == '0x0' or tx_status == 0:
             return TransactionStatus.FAIL
 
         # pre-Byzantium, no status field
@@ -432,12 +433,14 @@ class SDK(object):
         """
         if not tx.get('to') or tx['to'].lower() != self.token_contract.address.lower():  # must be sent to our contract
             return False, '', '', 0
-        if not tx.get('input') or tx['input'] == '0x':  # not a contract transaction
+        tx_input = tx.get('input')
+        if not tx_input or tx_input == '0x':  # not a contract transaction
             return False, '', '', 0
-        if not tx['input'].startswith(ERC20_TRANSFER_ABI_PREFIX):  # only interested in calls to 'transfer' method
+        if not tx_input.lower().startswith(ERC20_TRANSFER_ABI_PREFIX.lower()):
+            # only interested in calls to 'transfer' method
             return False, '', '', 0
 
-        to, amount = decode_abi(['uint256', 'uint256'], tx['input'][len(ERC20_TRANSFER_ABI_PREFIX):])
+        to, amount = decode_abi(['uint256', 'uint256'], tx_input[len(ERC20_TRANSFER_ABI_PREFIX):])
         to = to_hex(to)
         amount = self.web3.fromWei(amount, 'ether')
         if ('from' in filter_args and tx['from'].lower() == filter_args['from'].lower() and
@@ -542,7 +545,7 @@ class TransactionManager(object):
     def estimate_token_tx_gas(self):
         hex_data = self.token_contract._encode_transaction_data('transfer', args=(self.address, 1000))
         sample_tx = {
-            'to': self.address,
+            'to': self.token_contract.address,
             'from': self.address,
             'value': 0,
             'data': hex_data
