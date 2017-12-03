@@ -70,20 +70,19 @@ class TransactionData(object):
 class SDK(object):
     """
     This class is the primary interface to the ERC20 Token Python SDK.
-    It maintains a context for a connection with an Ethereum JSON-RPC node and hides most of the
-    specifics of dealing with Ethereum JSON-RPC API.
+    It maintains a connection context with an Ethereum JSON-RPC node and hides most of the specifics
+    of dealing with Ethereum JSON-RPC API.
     """
 
     def __init__(self, keyfile='', password='', private_key='', provider='', provider_endpoint_uri='',
                  contract_address='', contract_abi={}):
         """Create a new instance of the Token SDK.
 
-        The SDK needs a JSON-RPC provider, contract definitions and the wallet private key.
-        The user may pass either a provider or a provider endpoint URI, in which case a default
-        :class:`web3:providers:HTTPProvider` will be created.
+        The SDK needs a JSON-RPC provider, contract definitions and (optionally) a wallet private key.
 
-        If neither private_key nor keyfile/password are provided, the SDK can still be used in "anonymous" mode
-        with only the following functions available:
+        The user may pass either a provider or a provider endpoint URI, in which case a default
+        :class:`web3:providers:HTTPProvider` will be created. If neither private_key nor keyfile+password
+        are provided, the SDK can still be used in "anonymous" mode, with only the following functions available:
             - get_address_ether_balance
             - get_transaction_status
             - get_transaction_data
@@ -92,26 +91,26 @@ class SDK(object):
         :param str private_key: a private key to initialize the wallet with. If either private key or keyfile
             are not provided, the wallet will not be initialized and methods needing the wallet will raise exception.
 
-        :param str keyfile: the path to the keyfile to initialize to wallet with. Usually you will also need to supply
-        a password for this keyfile.
+        :param str keyfile: the path to the keyfile to initialize the wallet with. You will also need to supply
+            a password for this keyfile.
 
         :param str password: a password for the keyfile.
 
-        :param provider: JSON-RPC provider to work with. If not provided, a default `web3:providers:HTTPProvider`
+        :param provider: JSON-RPC provider to work with. If not given, a default `web3:providers:HTTPProvider`
             is used, inited with provider_endpoint_uri.
         :type provider: :class:`web3:providers:BaseProvider`
 
-        :param str provider_endpoint_uri: a URI to use with a default HTTPProvider. If not provided, a
-            default endpoint will be used.
+        :param str provider_endpoint_uri: a URI to use with a default HTTPProvider.
 
         :param str contract_address: the address of the token contract.
 
-        :param dict contract_abi: The contract ABI.
+        :param list contract_abi: The contract ABI json.
 
         :returns: An instance of the SDK.
         :rtype: :class:`~erc20token.SDK`
 
-        :raises: :class:`~erc20token.exceptions.SdkConfigurationError` if some of the configuration parameters are invalid.
+        :raises: :class:`~erc20token.exceptions.SdkConfigurationError` if some of the configuration
+            parameters are invalid.
         """
 
         if not provider and not provider_endpoint_uri:
@@ -167,7 +166,7 @@ class SDK(object):
 
     def get_address(self):
         """Get public address of the SDK wallet.
-        The wallet is configured by a private key supplied in during SDK initialization.
+        The wallet is configured by a private key supplied during SDK initialization.
 
         :returns: public address of the wallet.
         :rtype: str
@@ -242,8 +241,9 @@ class SDK(object):
 
         :raises: :class:`~erc20token.exceptions.SdkConfigurationError`: if the SDK was not configured with a private key.
         :raises: ValueError: if the amount is not positive.
+        :raises: ValueError: if the address has a wrong format.
         :raises: ValueError: if the nonce is incorrect.
-        :raises: ValueError: if insufficient funds for for gas * price + value.
+        :raises: ValueError: if insufficient funds for for gas * gas_price + value.
         """
         if not self.address:
             raise SdkNotConfiguredError('private key not configured')
@@ -264,8 +264,9 @@ class SDK(object):
 
         :raises: :class:`~erc20token.exceptions.SdkConfigurationError`: if the SDK was not configured with a private key.
         :raises: ValueError: if the amount is not positive.
+        :raises: ValueError: if the address has a wrong format.
         :raises: ValueError: if the nonce is incorrect.
-        :raises: ValueError if insufficient funds for for gas * price.
+        :raises: ValueError: if insufficient funds for for gas * gas_price.
         """
         if not self.address:
             raise SdkNotConfiguredError('private key not configured')
@@ -292,7 +293,7 @@ class SDK(object):
     def get_transaction_data(self, tx_id):
         """Gets transaction data for the provided transaction id.
 
-        :param str tx_id: transaction id
+        :param str tx_id: transaction id (hash)
         :return: transaction data
         :rtype: :class:`~erc20token.TransactionData`
         """
@@ -414,9 +415,9 @@ class SDK(object):
         # pre-Byzantium, no status field
         # failed transaction usually consumes all the gas
         if tx_receipt.get('gasUsed') < tx.get('gas'):
-            return TransactionStatus.SUCCESS  # TODO: number of block confirmations
+            return TransactionStatus.SUCCESS
         # WARNING: there can be cases when gasUsed == gas for successful transactions!
-        # In our case however, we create our transactions with fixed gas limit
+        # We give our transactions extra gas, so it should not happen.
         return TransactionStatus.FAIL
 
     def _check_parse_contract_tx(self, tx, filter_args):
@@ -568,7 +569,9 @@ class FilterManager(object):
         After registering of a new filter, its worker function is overriden with our custom one.
 
         :param filter_params: parameters to pass to `web3.eth.filter`
+
         :param callbacks: callback function to add
+
         :returns: filter_id
         :rtype: str
         """
@@ -609,7 +612,7 @@ class FilterManager(object):
         return _runner
 
     def remove_filters(self):
-        """Unregister our filters from the node. Not required, as filters will time out anyway."""
+        """Unregister our filters from the node. Not mandatory, as filters will time out anyway."""
         for key, filtr in self.filters.items():
             filtr.stop_watching(0.1)
             self.filters.pop(key, None)

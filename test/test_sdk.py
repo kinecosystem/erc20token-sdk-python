@@ -224,6 +224,8 @@ def test_get_address_token_balance(test_sdk, testnet):
 def test_send_ether_fail(test_sdk, testnet):
     with pytest.raises(ValueError, match='amount must be positive'):
         test_sdk.send_ether(testnet.address, 0)
+    with pytest.raises(ValueError, match="'0xBAD' is not an address"):
+        test_sdk.send_ether('0xBAD', 1)
     if testnet.type == 'ropsten':
         msg_match = 'Insufficient funds. The account you tried to send transaction from does not have enough funds'
     else:
@@ -235,6 +237,8 @@ def test_send_ether_fail(test_sdk, testnet):
 def test_send_tokens_fail(test_sdk, testnet):
     with pytest.raises(ValueError, match='amount must be positive'):
         test_sdk.send_tokens(testnet.address, 0)
+    with pytest.raises(ValueError, match="'0xBAD' is not an address"):
+        test_sdk.send_tokens('0xBAD', 1)
 
     # NOTE: sending more tokens than available will not cause immediate exception like with ether,
     # but will result in failed onchain transaction

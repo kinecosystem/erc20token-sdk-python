@@ -8,11 +8,13 @@ import sys
 
 def create_keyfile(private_key, password, filename):
     """Creates a wallet keyfile.
-    see https://github.com/ethereum/go-ethereum/wiki/Passphrase-protected-key-store-spec
+    See https://github.com/ethereum/go-ethereum/wiki/Passphrase-protected-key-store-spec
 
     :param str private_key: private key
-    :param password: keyfile password
-    :param filename: keyfile path
+
+    :param str password: keyfile password
+
+    :param str filename: keyfile path
 
     :raises: NotImplementedError: when using Python 2
     """
@@ -28,7 +30,9 @@ def load_keyfile(keyfile, password):
     """Loads a private key from the given keyfile.
 
     :param str keyfile: keyfile path
-    :param password: keyfile password
+
+    :param str password: keyfile password
+
     :returns: private key
     :rtype: str
 
