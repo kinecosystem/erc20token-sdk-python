@@ -14,13 +14,14 @@ setup(
     version=__version__,
     description='ERC20 token SDK for Python',
     author='Kin Foundation',
+    author_email='david.bolshoy@kik.com',
     maintainer='David Bolshoy',
     maintainer_email='david.bolshoy@kik.com',
     url='https://github.com/kinfoundation/erc20token-sdk-python',
     license='GPLv2',
     packages=["erc20token"],
     long_description=open("README.md").read(),
-    keywords = ["ethereum", "erc20", "blockchain", "cryptocurrency"],
+    keywords=["ethereum", "erc20", "blockchain", "cryptocurrency"],
     classifiers=[
         'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
         'Intended Audience :: Developers',
@@ -32,4 +33,5 @@ setup(
     ],
     install_requires=requires,
     tests_require=tests_requires,
+    python_requires='>=2.7',
 )

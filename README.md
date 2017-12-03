@@ -13,7 +13,7 @@ Make sure you have Python 2 >=2.7.9.
 ## Installation 
 
 ```sh
-pip install git+https://github.com/kinfoundation/erc20token-sdk-python.git
+pip install erc20token
 ```
 
 ### Installation in Google App Engine Python Standard Environment
