@@ -1,6 +1,6 @@
 
 # ERC20 Token Python SDK 
-[![Build Status](https://travis-ci.org/kinfoundation/erc20token-sdk-python.svg?token=f7PF9BYUzqkMQU5JpUvN)](https://travis-ci.org/kinfoundation/erc20token-sdk-python) [![Coverage Status](https://codecov.io/gh/kinfoundation/erc20token-sdk-python/branch/master/graph/badge.svg?token=dOvV9K8oFe)](https://codecov.io/gh/kinfoundation/erc20token-sdk-python)
+[![Build Status](https://travis-ci.org/kinfoundation/erc20token-sdk-python.svg)](https://travis-ci.org/kinfoundation/erc20token-sdk-python) [![Coverage Status](https://codecov.io/gh/kinfoundation/erc20token-sdk-python/branch/master/graph/badge.svg?token=dOvV9K8oFe)](https://codecov.io/gh/kinfoundation/erc20token-sdk-python)
 
 ## Disclaimer
 
