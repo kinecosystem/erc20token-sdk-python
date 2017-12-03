@@ -37,27 +37,16 @@ because they launch a thread, and GAE Standard applications cannot spawn threads
 ```python
 import erc20token
 
-# Init SDK with default parameters
-# default parameters:
-#   `provider` is `web3.providers.HTTPProvider`
-#   `provider_endpoint_uri` is `http://159.89.240.147:8545`
-#   `contract_address` is KIN production contract `0x818fc6c2ec5986bc6e2cbf00939d90556ab12ce5`
-#   `contract_abi` is KIN production contract ABI
-# Note: this is useful for anonymous blockchain access, when your private key is not needed.
-token_sdk = erc20token.SDK()
-
-# Init SDK with my private key and default parameters
-token_sdk = erc20token.SDK(private_key='a60baaa34ed125af0570a3df7d4cd3e80dd5dc5070680573f8de0ecfc1957575')
-
-# Init SDK with my keyfile and default parameters
+# Init SDK with private key
+token_sdk = erc20token.SDK(provider_endpoint_uri='JSON-RPC endpoint URI', private_key='my private key',
+                       contract_address='my contract address', contract_abi='abi of my contract as json')
+                       
+# Init SDK with keyfile
 # First, create a keyfile from my private key
 erc20token.create_keyfile('a60baaa34ed125af0570a3df7d4cd3e80dd5dc5070680573f8de0ecfc1957575', 
                           'my password', 'keyfile.json')
 # Init SDK with this keyfile
-token_sdk = erc20token.SDK(keyfile='keyfile.json', password='my password')
-
-# Init SDK with custom parameters
-token_sdk = erc20token.SDK(provider_endpoint_uri='JSON-RPC endpoint URI', private_key='my private key',
+token_sdk = erc20token.SDK(provider_endpoint_uri='JSON-RPC endpoint URI', keyfile='keyfile.json', password='my password',
                        contract_address='my contract address', contract_abi='abi of my contract as json')
 ````
 For more examples, see the [SDK test file](test/test_sdk.py). The file also contains pre-defined values for testing
