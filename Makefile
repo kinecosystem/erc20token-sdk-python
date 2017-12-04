@@ -30,6 +30,14 @@ testrpc:
 	cd ./test/truffle_env && npm run-script testrpc
 .PHONY: testrpc
 
+wheel:
+	python setup.py bdist_wheel
+.PHONY: wheel
+
+pypi:
+	twine upload dist/*
+.PHONY: pypi
+
 clean: truffle-clean
 	rm -f .coverage
 	find . -name \*.pyc -delete
