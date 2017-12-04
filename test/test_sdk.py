@@ -221,6 +221,14 @@ def test_get_address_token_balance(test_sdk, testnet):
     assert balance > 0
 
 
+def test_get_token_total_supply(test_sdk, testnet):
+    total_supply = test_sdk.get_token_total_supply()
+    if testnet.type == 'testrpc':
+        assert total_supply == 1000
+    else:
+        assert total_supply > 1000000000
+
+
 def test_send_ether_fail(test_sdk, testnet):
     with pytest.raises(ValueError, match='amount must be positive'):
         test_sdk.send_ether(testnet.address, 0)

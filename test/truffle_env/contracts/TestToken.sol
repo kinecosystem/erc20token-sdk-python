@@ -180,12 +180,4 @@ contract TestToken is Ownable {
 
         return true;
     }
-
-    /// @dev A testing function to assign tokens to a specific account.
-    /// @param _account The account to assign tokens to.
-    /// @param _balance the number of tokens to assign.
-    function assign(address _account, uint _balance) public returns (bool) {
-        balances[_account] = _balance;
-        return true;
-    }
 }

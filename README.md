@@ -60,6 +60,12 @@ with testrpc and Ropsten.
 address = token_sdk.get_address()
 ```
 
+### Get the Number of Issued Tokens
+```python
+# Get total supply of tokens
+total_supply = token_sdk.get_token_total_supply()
+```
+
 ### Getting Account Balance
 ```python
 # Get Ether balance of my account
@@ -161,7 +167,8 @@ As was mentioned earlier, you will not be able to use the functions `monitor_eth
 1. The SDK only support tokens with 18 decimals, which is the most common number of decimal places. When using tokens
 with a different number of decimals, you will need to make your own conversions.
 2. The SDK supports only a limited subset of [ERC20 Token Standard](https://theethereum.wiki/w/index.php/ERC20_Token_Standard),
-namely `transfer` and `balanceOf` functions. Additional functionality will be added as needed. Your PRs are welcome!
+namely `totalSupply`, `transfer` and `balanceOf` functions. Additional functionality will be added as needed. 
+Your PRs are welcome!
 
 ## License
 The code is currently released under [GPLv2 license](LICENSE) due to some GPL-licensed packages it uses. In the 

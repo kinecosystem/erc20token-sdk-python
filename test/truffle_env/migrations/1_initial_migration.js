@@ -10,7 +10,7 @@ module.exports = (deployer, network, accounts) => {
 
         // give tokens to the testing account
         let numTokens = 1000;
-        ok = await instance.assign(accounts[0], web3.toWei(numTokens, "ether"));
+        ok = await instance.issueTokens(accounts[0], web3.toWei(numTokens, "ether"));
         assert.ok(ok);
 
         // check resulting balance
