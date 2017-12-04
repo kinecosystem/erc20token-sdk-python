@@ -4,7 +4,7 @@
 
 ## Disclaimer
 
-The SDK is still in beta. No warranties are given. Use on your own discretion.
+The SDK is still in beta. No warranties are given, use on your own discretion.
 
 ## Requirements.
 
@@ -45,8 +45,9 @@ token_sdk = erc20token.SDK(provider_endpoint_uri='JSON-RPC endpoint URI', privat
 # First, create a keyfile from my private key
 erc20token.create_keyfile('a60baaa34ed125af0570a3df7d4cd3e80dd5dc5070680573f8de0ecfc1957575', 
                           'my password', 'keyfile.json')
-# Init SDK with this keyfile
-token_sdk = erc20token.SDK(provider_endpoint_uri='JSON-RPC endpoint URI', keyfile='keyfile.json', password='my password',
+# Then, init SDK with this keyfile
+token_sdk = erc20token.SDK(provider_endpoint_uri='JSON-RPC endpoint URI', 
+                       keyfile='keyfile.json', password='my password',
                        contract_address='my contract address', contract_abi='abi of my contract as json')
 ````
 For more examples, see the [SDK test file](test/test_sdk.py). The file also contains pre-defined values for testing
@@ -134,6 +135,33 @@ for wait in range(0, 90):
     sleep(1)
 assert tx_statuses[tx_id] == erc20token.TransactionStatus.SUCCESS
 ```
+
+## Limitations
+
+### Ethereum Node
+
+The SDK requires that some of the features in [JSON-RPC API](https://github.com/ethereum/wiki/wiki/JSON-RPC) 
+implementation of Ethereum node work correctly: specifically handling filters and pending transactions. Due to a very 
+dynamic state of development of Ethereum nodes, the support for these features is not yet solid and varies from 
+vendor to vendor and from version to version. After some experimentation, we settled on the
+[Parity Ethereum Node](https://www.parity.io/), version **v1.8.2-beta**.
+
+If you are running several Ethereum nodes behind a load balancer, you should enable connection stickiness on the 
+load balancer: The SDK keeps a state (running filters) on the node it is using and stickiness ensures that requests 
+will reach the same node. In addition, sending a transaction to one node will not make it immediately visible on 
+another node, so stickiness ensures consistent transaction-state when polling on nodes.
+
+### GAE Standard
+
+As was mentioned earlier, you will not be able to use the functions `monitor_ether_transactions` and 
+`monitor_token_transactions`, because they launch a thread, and GAE Standard applications cannot spawn threads.
+
+### Token Limitations
+
+1. The SDK only support tokens with 18 decimals, which is the most common number of decimal places. When using tokens
+with a different number of decimals, you will need to make your own conversions.
+2. The SDK supports only a limited subset of [ERC20 Token Standard](https://theethereum.wiki/w/index.php/ERC20_Token_Standard),
+namely `transfer` and `balanceOf` functions. Additional functionality will be added as needed. Your PRs are welcome!
 
 ## License
 The code is currently released under [GPLv2 license](LICENSE) due to some GPL-licensed packages it uses. In the 
