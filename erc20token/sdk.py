@@ -229,6 +229,14 @@ class SDK(object):
         validate_address(address)
         return self.web3.fromWei(self.token_contract.call().balanceOf(address), 'ether')
 
+    def get_token_total_supply(self):
+        """Get total number of tokens issued.
+
+        :return: total supply of tokens
+        :rtype: Decimal
+        """
+        return self.web3.fromWei(self.token_contract.call().totalSupply(), 'ether')
+
     def send_ether(self, address, amount):
         """Send Ether from my wallet to address.
 
