@@ -549,7 +549,11 @@ class TransactionManager(object):
             'from': self.address,
             'value': 1
         }
-        return get_buffered_gas_estimate(self.web3, sample_tx, gas_buffer=5000)
+        try:
+            return get_buffered_gas_estimate(self.web3, sample_tx, gas_buffer=5000)
+        except Exception as e:
+            logging.warning('cannot estimate gas for eth transactions: ' + str(e))
+            return None
 
     def estimate_token_tx_gas(self):
         hex_data = self.token_contract._encode_transaction_data('transfer', args=(self.address, 1000))
@@ -559,7 +563,11 @@ class TransactionManager(object):
             'value': 0,
             'data': hex_data
         }
-        return get_buffered_gas_estimate(self.web3, sample_tx, gas_buffer=10000)
+        try:
+            return get_buffered_gas_estimate(self.web3, sample_tx, gas_buffer=10000)
+        except Exception as e:
+            logging.warning('cannot estimate gas for token transactions: ' + str(e))
+            return None
 
 
 class FilterManager(object):

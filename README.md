@@ -162,13 +162,14 @@ another node, so stickiness ensures consistent transaction-state when polling on
 As was mentioned earlier, you will not be able to use the functions `monitor_ether_transactions` and 
 `monitor_token_transactions`, because they launch a thread, and GAE Standard applications cannot spawn threads.
 
-### Token Limitations
+### SDK Limitations
 
 1. The SDK only support tokens with 18 decimals, which is the most common number of decimal places. When using tokens
 with a different number of decimals, you will need to make your own conversions.
 2. The SDK supports only a limited subset of [ERC20 Token Standard](https://theethereum.wiki/w/index.php/ERC20_Token_Standard),
 namely `totalSupply`, `transfer` and `balanceOf` functions. Additional functionality will be added as needed. 
 Your PRs are welcome!
+3. The SDK initialization with keyfile and password is currently supported only in Python 2.7.
 
 ## License
 The code is currently released under [GPLv2 license](LICENSE) due to some GPL-licensed packages it uses. In the 
