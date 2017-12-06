@@ -487,8 +487,6 @@ class TransactionManager(object):
         self.lock = threading.Lock()
 
         # initial gas estimations
-        self.ether_tx_gas_estimate = self.estimate_ether_tx_gas() or DEFAULT_GAS_PER_TX
-        self.token_tx_gas_estimate = self.estimate_token_tx_gas() or DEFAULT_GAS_PER_TX
         self.gas_price = self.web3.eth.gasPrice or DEFAULT_GAS_PRICE
 
     def send_transaction(self, address, amount, data=b''):
@@ -505,27 +503,23 @@ class TransactionManager(object):
         :returns: transaction id (hash)
         :rtype: str
         """
-
-        if data:  # token transaction
-            gas_estimate = self.token_tx_gas_estimate
-        else:
-            gas_estimate = self.ether_tx_gas_estimate
-
         with self.lock:
             attempts = 0
             while True:
                 try:
                     remote_nonce = self.web3.eth.getTransactionCount(self.address, 'pending')
                     nonce = max(self.local_nonce, remote_nonce)
+                    value = self.web3.toWei(amount, 'ether')
                     tx = Transaction(
                         nonce=nonce,
                         gasprice=self.gas_price,
-                        startgas=gas_estimate,
+                        startgas=self.estimate_tx_gas({'to': address, 'value': value, 'data': data}),
                         to=address,
-                        value=self.web3.toWei(amount, 'ether'),
+                        value=value,
                         data=data,
-                    ).sign(self.private_key)
-                    raw_tx_hex = self.web3.toHex(rlp.encode(tx))
+                    )
+                    signed_tx = tx.sign(self.private_key)
+                    raw_tx_hex = self.web3.toHex(rlp.encode(signed_tx))
                     tx_id = self.web3.eth.sendRawTransaction(raw_tx_hex)
                     # send successful, increment nonce.
                     self.local_nonce = nonce + 1
@@ -543,31 +537,13 @@ class TransactionManager(object):
                             continue
                     raise
 
-    def estimate_ether_tx_gas(self):
-        sample_tx = {
-            'to': self.address,
-            'from': self.address,
-            'value': 1
-        }
+    def estimate_tx_gas(self, tx):
+        gas_buffer = 10000 if tx['data'] else 5000
         try:
-            return get_buffered_gas_estimate(self.web3, sample_tx, gas_buffer=5000)
+            return get_buffered_gas_estimate(self.web3, tx, gas_buffer=gas_buffer)
         except Exception as e:
-            logging.warning('cannot estimate gas for eth transactions: ' + str(e))
-            return None
-
-    def estimate_token_tx_gas(self):
-        hex_data = self.token_contract._encode_transaction_data('transfer', args=(self.address, 1000))
-        sample_tx = {
-            'to': self.token_contract.address,
-            'from': self.address,
-            'value': 0,
-            'data': hex_data
-        }
-        try:
-            return get_buffered_gas_estimate(self.web3, sample_tx, gas_buffer=10000)
-        except Exception as e:
-            logging.warning('cannot estimate gas for token transactions: ' + str(e))
-            return None
+            logging.warning('cannot estimate gas for transaction: ' + str(e))
+            return DEFAULT_GAS_PER_TX
 
 
 class FilterManager(object):
