@@ -16,7 +16,7 @@ from eth_utils import (
 from ethereum.transactions import Transaction
 
 import rlp
-from web3 import Web3, HTTPProvider
+from web3 import Web3
 from web3.utils.encoding import (
     hexstr_if_str,
     to_bytes,
@@ -32,6 +32,7 @@ from .exceptions import (
     SdkConfigurationError,
     SdkNotConfiguredError,
 )
+from .provider import RetryHTTPProvider
 from .utils import load_keyfile
 
 import logging
@@ -129,7 +130,7 @@ class SDK(object):
         if provider:
             self.web3 = Web3(provider)
         else:
-            self.web3 = Web3(HTTPProvider(provider_endpoint_uri))
+            self.web3 = Web3(RetryHTTPProvider(provider_endpoint_uri))
         if not self.web3.isConnected():
             raise SdkConfigurationError('cannot connect to provider endpoint')
 
@@ -513,7 +514,7 @@ class TransactionManager(object):
                     tx = Transaction(
                         nonce=nonce,
                         gasprice=self.gas_price,
-                        startgas=self.estimate_tx_gas({'to': address, 'value': value, 'data': data}),
+                        startgas=self.estimate_tx_gas({'to': address, 'value': to_hex(value), 'data': data}),
                         to=address,
                         value=value,
                         data=data,
@@ -538,12 +539,14 @@ class TransactionManager(object):
                     raise
 
     def estimate_tx_gas(self, tx):
-        gas_buffer = 10000 if tx['data'] else 5000
-        try:
-            return get_buffered_gas_estimate(self.web3, tx, gas_buffer=gas_buffer)
-        except Exception as e:
-            logging.warning('cannot estimate gas for transaction: ' + str(e))
-            return DEFAULT_GAS_PER_TX
+        # self.web3.eth.estimateGas(tx) is broken!
+        #gas_buffer = 10000 if tx['data'] else 5000
+        #try:
+        #    return get_buffered_gas_estimate(self.web3, tx, gas_buffer=gas_buffer)
+        #except Exception as e:
+        #    logging.warning('cannot estimate gas for transaction: ' + str(e))
+        #    return DEFAULT_GAS_PER_TX
+        return DEFAULT_GAS_PER_TX
 
 
 class FilterManager(object):
