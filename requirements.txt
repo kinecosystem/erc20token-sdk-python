@@ -5,10 +5,10 @@ chardet>=3.0.4
 coincurve>=6.0.0
 cytoolz>=0.8.2
 ethereum>=2.2.0
-ethereum-abi-utils>=0.4.4
-ethereum-keys>=0.1.0a7
-ethereum-tester>=0.1.0b2
-ethereum-utils>=0.6.0
+ethereum-abi-utils==0.4.4
+ethereum-keys==0.1.0a7
+ethereum-tester==0.1.0b2
+ethereum-utils==0.6.0
 future>=0.16.0
 idna>=2.6
 pbkdf2>=1.3

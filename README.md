@@ -41,7 +41,7 @@ To initialize the SDK, you need to provide the following parameters:
 - The ABI of your token contract as json
 - (optionally) either your private key, or a keyfile+password 
 
-If you do not provide a public key or a keyfile, you will NOT be able to use the following functions:
+**NOTE**: if you do not provide a private key or a keyfile, you will NOT be able to use the following functions:
 `get_address`, `get_ether_balance`, `get_token_balance`, `send_ether`, `send_tokens`.
 
 
@@ -170,6 +170,12 @@ for wait in range(0, 90):
     sleep(1)
 assert tx_statuses[tx_id] == erc20token.TransactionStatus.SUCCESS
 ```
+
+**NOTE**: if you are using a public Ethereum node (for example, http://mainnet.infura.io), it will probably have 
+some of the [JSON-RPC API](https://github.com/ethereum/wiki/wiki/JSON-RPC) disabled to prevent abuse. Usually, it
+means that filter-related calls are blocked, so the SDK functions `monitor_ether_transactions` and 
+`monitor_token_transactions` will not work. As a workaround, you can create your own transaction monitor using
+the function `get_transaction_status` or `get_transaction_data`.
 
 ## Limitations
 
