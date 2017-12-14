@@ -528,7 +528,7 @@ class TransactionManager(object):
                     tx = Transaction(
                         nonce=nonce,
                         gasprice=self.gas_price,
-                        startgas=self.estimate_tx_gas({'to': address, 'value': to_hex(value), 'data': data}),
+                        startgas=self.estimate_tx_gas({'to': address, 'from': self.address, 'value': value, 'data': data}),
                         to=address,
                         value=value,
                         data=data,
@@ -553,16 +553,24 @@ class TransactionManager(object):
                     raise
 
     def estimate_tx_gas(self, tx):
+        """Estimate transaction gas.
+        If there is a predefined limit, return it.
+        Otherwise ask the API to estimate gas and add a buffer for safety.
+
+        :param dict tx: sample transaction to estimate gas for.
+        :return: estimated gas, or default gas if estimate has failed.
+        :rtype: int
+        """
         if self.gas_limit:
             return self.gas_limit
-        # self.web3.eth.estimateGas(tx) is broken!
-        #gas_buffer = 10000 if tx['data'] else 5000
-        #try:
-        #    return get_buffered_gas_estimate(self.web3, tx, gas_buffer=gas_buffer)
-        #except Exception as e:
-        #    logging.warning('cannot estimate gas for transaction: ' + str(e))
-        #    return DEFAULT_GAS_PER_TX
-        return DEFAULT_GAS_PER_TX
+        gas_buffer = 10000 if tx.get('data') else 5000
+        try:
+            if tx['data']:
+                tx['data'] = encode_hex(tx['data'])
+            return get_buffered_gas_estimate(self.web3, tx, gas_buffer=gas_buffer)
+        except Exception as e:
+            logging.warning('cannot estimate gas for transaction: ' + str(e))
+            return DEFAULT_GAS_PER_TX
 
 
 class FilterManager(object):
