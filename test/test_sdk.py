@@ -1,13 +1,13 @@
 
 from decimal import Decimal
 import json
-import erc20token
 import os
 import pytest
-import signal
 import sys
 import threading
 from time import sleep
+
+import erc20token
 
 # Ropsten configuration.
 # the following address is set up in Ropsten and is pre-filled with ether and tokens.
@@ -94,6 +94,18 @@ def test_create_fail_invalid_abi(testnet):
                        contract_abi=['bad'])
 
 
+def test_create_invalid_gas_params(testnet):
+    with pytest.raises(erc20token.SdkConfigurationError, match='gas price must be either integer of float'):
+        erc20token.SDK(provider_endpoint_uri=testnet.provider_endpoint_uri, contract_address=testnet.address,
+                       contract_abi=testnet.contract_abi, gas_price='bad')
+    with pytest.raises(erc20token.SdkConfigurationError, match='gas price must be either integer of float'):
+        erc20token.SDK(provider_endpoint_uri=testnet.provider_endpoint_uri, contract_address=testnet.address,
+                       contract_abi=testnet.contract_abi, gas_price='0x123')
+    with pytest.raises(erc20token.SdkConfigurationError, match='gas limit must be integer'):
+        erc20token.SDK(provider_endpoint_uri=testnet.provider_endpoint_uri, contract_address=testnet.address,
+                       contract_abi=testnet.contract_abi, gas_price=10, gas_limit='bad')
+
+
 def test_create_fail_bad_endpoint(testnet):
     with pytest.raises(erc20token.SdkConfigurationError, match='cannot connect to provider endpoint'):
         erc20token.SDK(provider_endpoint_uri='bad', contract_address=testnet.address, contract_abi=testnet.contract_abi)
@@ -174,6 +186,15 @@ def test_create_with_keyfile(testnet):
     os.remove(TEST_KEYFILE)
 
 
+def test_create_with_gas_params(testnet):
+    sdk = erc20token.SDK(provider_endpoint_uri=testnet.provider_endpoint_uri, contract_address=testnet.address,
+                         contract_abi=testnet.contract_abi, private_key=testnet.private_key,
+                         gas_price=10.1, gas_limit=10000)
+    assert sdk
+    assert sdk._tx_manager.gas_price == 10100000000
+    assert sdk._tx_manager.gas_limit == 10000
+
+
 @pytest.fixture(scope='session')
 def test_sdk(testnet):
     sdk = erc20token.SDK(provider_endpoint_uri=testnet.provider_endpoint_uri, private_key=testnet.private_key,
@@ -183,7 +204,7 @@ def test_sdk(testnet):
     assert sdk.token_contract
     assert sdk.private_key == testnet.private_key
     assert sdk.get_address() == testnet.address
-    assert sdk._tx_manager.gas_price >= 10 ** 9
+    assert sdk._tx_manager.gas_price == sdk.web3.eth.gasPrice
     return sdk
 
 
