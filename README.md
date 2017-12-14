@@ -40,6 +40,8 @@ To initialize the SDK, you need to provide the following parameters:
 - The address of your token contract
 - The ABI of your token contract as json
 - (optionally) either your private key, or a keyfile+password 
+- (optionally) gas price in Gwei
+- (optionally) constant gas limit for your transactions
 
 **NOTE**: if you do not provide a private key or a keyfile, you will NOT be able to use the following functions:
 `get_address`, `get_ether_balance`, `get_token_balance`, `send_ether`, `send_tokens`.
@@ -69,6 +71,13 @@ token_sdk = erc20token.SDK(provider_endpoint_uri='http://localhost:8545',
                        keyfile='keyfile.json', password='my password',
                        contract_address='0x04f72aa40046c5fb3b143aaba3ab64d1a82410a7', 
                        contract_abi=json.loads(contract_abi))
+                       
+# Init SDK with custom gas parameters
+token_sdk = erc20token.SDK(provider_endpoint_uri='http://localhost:8545', 
+                       private_key='a60baaa34ed125af0570a3df7d4cd3e80dd5dc5070680573f8de0ecfc1957575',
+                       contract_address='0x04f72aa40046c5fb3b143aaba3ab64d1a82410a7', 
+                       contract_abi=json.loads(contract_abi),
+                       gas_price=10, gas_limit=50000)
 ````
 For more examples, see the [SDK test file](test/test_sdk.py). The file also contains pre-defined values for testing
 with testrpc and Ropsten.

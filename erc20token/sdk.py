@@ -76,7 +76,7 @@ class SDK(object):
     """
 
     def __init__(self, keyfile='', password='', private_key='', provider='', provider_endpoint_uri='',
-                 contract_address='', contract_abi={}):
+                 contract_address='', contract_abi={}, gas_price=None, gas_limit=None):
         """Create a new instance of the Token SDK.
 
         The SDK needs a JSON-RPC provider, contract definitions and (optionally) a wallet private key.
@@ -107,6 +107,10 @@ class SDK(object):
 
         :param list contract_abi: The contract ABI json.
 
+        :param number gas_price: The price of gas in Gwei.
+
+        :param number gas_limit: Transaction gas limit.
+
         :returns: An instance of the SDK.
         :rtype: :class:`~erc20token.SDK`
 
@@ -126,6 +130,12 @@ class SDK(object):
             validate_abi(contract_abi)
         except Exception as e:
             raise SdkConfigurationError('invalid token contract abi: ' + str(e))
+
+        if gas_price and not (isinstance(gas_price, int) or isinstance(gas_price, float)):
+            raise SdkConfigurationError('gas price must be either integer of float')
+
+        if gas_limit and not isinstance(gas_limit, int):
+            raise SdkConfigurationError('gas limit must be integer')
 
         if provider:
             self.web3 = Web3(provider)
@@ -155,7 +165,8 @@ class SDK(object):
                 raise SdkConfigurationError('cannot load private key: ' + str(e))
 
             # init transaction manager
-            self._tx_manager = TransactionManager(self.web3, self.private_key, self.address, self.token_contract)
+            self._tx_manager = TransactionManager(self.web3, self.private_key, self.address, self.token_contract,
+                                                  gas_price, gas_limit)
 
         # monitoring filter manager
         self._filter_mgr = FilterManager(self.web3)
@@ -479,16 +490,19 @@ class TransactionManager(object):
     and centralize nonce calculation.
     """
 
-    def __init__(self, web3, private_key, address, token_contract):
+    def __init__(self, web3, private_key, address, token_contract, gas_price, gas_limit):
         self.web3 = web3
         self.private_key = private_key
         self.address = address
         self.token_contract = token_contract
         self.local_nonce = self.web3.eth.getTransactionCount(self.address)
+        self.gas_limit = gas_limit
         self.lock = threading.Lock()
 
-        # initial gas estimations
-        self.gas_price = self.web3.eth.gasPrice or DEFAULT_GAS_PRICE
+        if gas_price:
+            self.gas_price = int(gas_price * 10**9)  # gas_price is in Gwei, convert it to wei
+        else:
+            self.gas_price = self.web3.eth.gasPrice or DEFAULT_GAS_PRICE
 
     def send_transaction(self, address, amount, data=b''):
         """Send transaction with retry.
@@ -539,6 +553,8 @@ class TransactionManager(object):
                     raise
 
     def estimate_tx_gas(self, tx):
+        if self.gas_limit:
+            return self.gas_limit
         # self.web3.eth.estimateGas(tx) is broken!
         #gas_buffer = 10000 if tx['data'] else 5000
         #try:
@@ -611,4 +627,3 @@ class FilterManager(object):
         for key, filtr in self.filters.items():
             filtr.stop_watching(0.1)
             self.filters.pop(key, None)
-
