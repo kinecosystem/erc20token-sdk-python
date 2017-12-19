@@ -139,7 +139,8 @@ def test_create_fail_keyfile(testnet):
     with pytest.raises(erc20token.SdkConfigurationError, match="cannot load keyfile: invalid keyfile format"):
         erc20token.SDK(provider_endpoint_uri=testnet.provider_endpoint_uri, contract_address=testnet.address,
                        contract_abi=testnet.contract_abi, keyfile=TEST_KEYFILE)
-
+    os.remove(TEST_KEYFILE)
+    
     # good keyfile, wrong password
     erc20token.create_keyfile(testnet.private_key, TEST_PASSWORD, TEST_KEYFILE)
     with pytest.raises(erc20token.SdkConfigurationError, match='cannot load keyfile: MAC mismatch. Password incorrect?'):

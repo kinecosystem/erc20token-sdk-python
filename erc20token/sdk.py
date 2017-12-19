@@ -628,6 +628,10 @@ class FilterManager(object):
                         logging.warning('filter {} has expired, recreating'.format(filtr.filter_id))
                         new_filter = self.web3.eth.filter(filter_params)
                         filtr.filter_id = new_filter.filter_id
+                        continue
+                    logging.exception(ve)
+                except Exception as e:
+                    logging.exception(e)
         return _runner
 
     def remove_filters(self):
