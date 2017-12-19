@@ -216,6 +216,16 @@ namely `totalSupply`, `transfer` and `balanceOf` functions. Additional functiona
 Your PRs are welcome!
 3. The SDK initialization with keyfile and password is currently supported only in Python 2.7.
 
+## Roadmap
+
+- Use [web3.py v.4](https://github.com/ethereum/web3.py). Currently v.3.16.x is used.
+- Change the license to MIT after removing GPL'ed packages.
+- Add the rest of ERC20 methods if needed.
+- Add support to [ERC223 `transfer` method](https://github.com/ethereum/EIPs/issues/223).
+- Support various token `decimals`.
+- Retrieve contract ABI using [Etherscan Contract API](https://etherscan.io/apis#contracts).
+- Get current USD/BTC/ETH prices using [Coinmarketcap API](https://coinmarketcap.com/api/).
+
 ## License
 The code is currently released under [GPLv2 license](LICENSE) due to some GPL-licensed packages it uses. In the 
 future, we will make an effort to use a less restrictive license.
