@@ -354,10 +354,10 @@ class SDK(object):
         def check_and_callback(tx, status):
             if tx.get('input') and not (tx['input'] == '0x' or tx['input'] == '0x0'):  # contract transaction, skip it
                 return
-            if ('from' in filter_args and tx['from'].lower() == filter_args['from'].lower() and
-                    ('to' not in filter_args or tx['to'].lower() == filter_args['to'].lower()) or
-                    ('to' in filter_args and tx['to'].lower() == filter_args['to'].lower())):
-                callback_fn(tx['hash'], status, tx['from'], tx['to'], self.web3.fromWei(tx['value'], 'ether'))
+            if (('from' in filter_args and tx['from'].lower() == filter_args['from'].lower() and
+                    ('to' not in filter_args or tx['to'].lower() == filter_args['to'].lower())) or
+                ('to' in filter_args and tx['to'].lower() == filter_args['to'].lower())):
+                    callback_fn(tx['hash'], status, tx['from'], tx['to'], self.web3.fromWei(tx['value'], 'ether'))
 
         def pending_tx_callback_adapter_fn(tx_id):
             tx = self.web3.eth.getTransaction(tx_id)
@@ -464,10 +464,10 @@ class SDK(object):
         to, amount = decode_abi(['uint256', 'uint256'], tx_input[len(ERC20_TRANSFER_ABI_PREFIX):])
         to = to_hex(to)
         amount = self.web3.fromWei(amount, 'ether')
-        if ('from' in filter_args and tx['from'].lower() == filter_args['from'].lower() and
-                ('to' not in filter_args or to.lower() == filter_args['to'].lower()) or
-                ('to' in filter_args and to.lower() == filter_args['to'].lower())):
-            return True, tx['from'], to, amount
+        if (('from' in filter_args and tx['from'].lower() == filter_args['from'].lower() and
+                ('to' not in filter_args or to.lower() == filter_args['to'].lower())) or
+            ('to' in filter_args and to.lower() == filter_args['to'].lower())):
+                return True, tx['from'], to, amount
         return False, '', '', 0
 
     @staticmethod
