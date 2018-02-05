@@ -218,6 +218,7 @@ Your PRs are welcome!
 
 ## Roadmap
 
+- Use a default ERC20 ABI if contract ABI is not provided.
 - Use [web3.py v.4](https://github.com/ethereum/web3.py). Currently v.3.16.x is used.
 - Change the license to MIT after removing GPL'ed packages.
 - Add the rest of ERC20 methods if needed.
